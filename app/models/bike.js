@@ -35,7 +35,8 @@ var Schema = new schema({
 	status: {
 		type: String,
 		required: true,
-		default: 'available'
+		default: 'available',
+		index: true
 	}
 });
 
