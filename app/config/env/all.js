@@ -5,12 +5,12 @@ var rootPath = path.normalize(__dirname + '/../../..');
 
 module.exports = {
 	root: rootPath,
-	db: 'mongo',
+	db: 'mongodb://admin:admin@ds045011.mongolab.com:45011/brainz',
 	app: {
 		name: 'Ruedala Brainz'
 	},
 	port: process.env.PORT || 80,
 	hostname: process.env.HOST || process.env.HOSTNAME,
-	jwt: 'ruedalaBrainz',
+	jwt: 'y4A8svIZ9oVwHGaoYXOA',
 	apiVersion: 0.1,
 };
