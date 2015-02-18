@@ -17,8 +17,7 @@ exports.getBikes = function(req, res, next) {
 	Bike.find(query).lean().exec(function getAllBikes(err, bikes) {
 		return res.status(200).json(bikes);
 	});
-}
-
+};
 
 exports.createBike = function(req, res, next) {
 

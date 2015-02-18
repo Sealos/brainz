@@ -73,10 +73,3 @@ process.on('SIGINT', function onInterruption() {
 	app.close();
 	process.exit();
 });
-
-/**
- * Something went horribly wrong, no need to crash just alert
- */
-process.on('uncaughtException', function onException(err) {
-	errorController.onFunctionError(err);
-});
