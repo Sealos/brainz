@@ -8,7 +8,8 @@ var Schema = new schema({
 	_id: {
 		type: ObjectId,
 		required: true,
-		unique: true
+		unique: true,
+		default: mongoose.Types.ObjectId()
 	},
 	licensePlate: {
 		type: String,
@@ -16,7 +17,7 @@ var Schema = new schema({
 		unique: true,
 	},
 	color: {
-		type: String,
+		type: String,	
 		required: true,
 		default: 'Red'
 	},

@@ -20,17 +20,16 @@ exports.getBikes = function(req, res, next) {
 };
 
 exports.createBike = function(req, res, next) {
-
-	req.checkBody('licensePlate', 'licensePlate is required').isEmpty();
-	req.checkBody('color', 'color is required').isEmpty();
-	req.checkBody('brand', 'brand is required').isEmpty();
+	req.checkBody('licensePlate', 'licensePlate is required').notEmpty();
+	req.checkBody('color', 'color is required').notEmpty();
+	req.checkBody('brand', 'brand is required').notEmpty();
 
 	var errors = req.validationErrors();
 	if (errors)
 		return res.status(400).json({
 			errors: errors
 		});
-
+	
 	var newBike = new Bike({
 		licensePlate: req.body.licensePlate,
 		color: req.body.color,
@@ -39,7 +38,7 @@ exports.createBike = function(req, res, next) {
 
 	newBike.save(function saveBike(err) {
 		if (err)
-			return next(err);
+			return res.status(409).json({err: 'Duplicated licensePlate'});
 
 		return res.status(200).send();
 	});
@@ -47,7 +46,7 @@ exports.createBike = function(req, res, next) {
 
 exports.lendBike = function(req, res, next) {
 
-	req.checkBody('bikeId', 'Bike id is required').isEmpty();
+	req.checkBody('bikeId', 'Bike id is required').notEmpty();
 
 	var errors = req.validationErrors();
 	if (errors)
