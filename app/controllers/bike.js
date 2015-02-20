@@ -29,7 +29,7 @@ exports.createBike = function(req, res, next) {
 		return res.status(400).json({
 			errors: errors
 		});
-	
+
 	var newBike = new Bike({
 		licensePlate: req.body.licensePlate,
 		color: req.body.color,
@@ -38,7 +38,9 @@ exports.createBike = function(req, res, next) {
 
 	newBike.save(function saveBike(err) {
 		if (err)
-			return res.status(409).json({err: 'Duplicated licensePlate'});
+			return res.status(409).json({
+				err: 'Duplicated licensePlate'
+			});
 
 		return res.status(200).send();
 	});
@@ -75,7 +77,7 @@ exports.lendBike = function(req, res, next) {
 
 exports.repairBike = function(req, res, next) {
 
-	req.checkBody('bikeId', 'Bike id is required').isEmpty();
+	req.checkBody('bikeId', 'Bike id is required').notEmpty();
 
 	var errors = req.validationErrors();
 	if (errors)
@@ -86,7 +88,6 @@ exports.repairBike = function(req, res, next) {
 	var query = {
 		_id: new ObjectId(req.body.bikeId)
 	};
-
 
 	Bike.find(query).lean().exec(function getPlaceToRepair(err, bikes) {
 		if (err)
@@ -105,7 +106,7 @@ exports.repairBike = function(req, res, next) {
 
 exports.moveBike = function(req, res, next) {
 
-	req.checkBody('bikeId', 'Bike id is required').isEmpty();
+	req.checkBody('bikeId', 'Bike id is required').notEmpty();
 
 	var errors = req.validationErrors();
 	if (errors)
@@ -116,7 +117,6 @@ exports.moveBike = function(req, res, next) {
 	var query = {
 		_id: new ObjectId(req.body.bikeId)
 	};
-
 
 	Bike.find(query).lean().exec(function getAllBikes(err, bikes) {
 		if (err)
@@ -139,7 +139,7 @@ exports.moveBike = function(req, res, next) {
 
 exports.breakBike = function(req, res, next) {
 
-	req.checkBody('bikeId', 'Bike id is required').isEmpty();
+	req.checkBody('bikeId', 'Bike id is required').notEmpty();
 
 	var errors = req.validationErrors();
 	if (errors)
@@ -150,7 +150,6 @@ exports.breakBike = function(req, res, next) {
 	var query = {
 		_id: new ObjectId(req.body.bikeId)
 	};
-
 
 	Bike.find(query).lean().exec(function getAllBikes(err, bikes) {
 		if (err)
@@ -169,7 +168,7 @@ exports.breakBike = function(req, res, next) {
 
 exports.stealBike = function(req, res, next) {
 
-	req.checkBody('bikeId', 'Bike id is required').isEmpty();
+	req.checkBody('bikeId', 'Bike id is required').notEmpty();
 
 	var errors = req.validationErrors();
 	if (errors)
@@ -180,7 +179,6 @@ exports.stealBike = function(req, res, next) {
 	var query = {
 		_id: new ObjectId(req.body.bikeId)
 	};
-
 
 	Bike.find(query).lean().exec(function getAllBikes(err, bikes) {
 		if (err)
@@ -199,7 +197,7 @@ exports.stealBike = function(req, res, next) {
 
 exports.avaliableBike = function(req, res, next) {
 
-	req.checkBody('bikeId', 'Bike id is required').isEmpty();
+	req.checkBody('bikeId', 'Bike id is required').notEmpty();
 
 	var errors = req.validationErrors();
 	if (errors)
@@ -210,7 +208,6 @@ exports.avaliableBike = function(req, res, next) {
 	var query = {
 		_id: new ObjectId(req.body.bikeId)
 	};
-
 
 	Bike.find(query).lean().exec(function getAllBikes(err, bikes) {
 		if (err)
