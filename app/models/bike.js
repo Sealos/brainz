@@ -28,7 +28,7 @@ var Schema = new schema({
 	// En uso - Lended
 	// Danada - broken
 	// Robada - stolen
-	// Reparacion - reparing
+	// Reparacion - repairing
 	// En movilizacion - moving
 	// En almacen - storage
 	// Disponible - available

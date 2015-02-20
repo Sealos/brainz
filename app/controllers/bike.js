@@ -73,3 +73,157 @@ exports.lendBike = function(req, res, next) {
 		});
 	});
 };
+
+exports.repairBike = function(req, res, next) {
+
+	req.checkBody('bikeId', 'Bike id is required').isEmpty();
+
+	var errors = req.validationErrors();
+	if (errors)
+		return res.status(400).json({
+			errors: errors
+		});
+
+	var query = {
+		_id: new ObjectId(req.body.bikeId)
+	};
+
+
+	Bike.find(query).lean().exec(function getPlaceToRepair(err, bikes) {
+		if (err)
+			return next(err);
+
+		bike.status = 'repairing';
+		// 
+		bike.save(function saveBike(err) {
+			if (err)
+				return next(err);
+
+			return res.status(200).send();
+		});
+	});
+};
+
+exports.moveBike = function(req, res, next) {
+
+	req.checkBody('bikeId', 'Bike id is required').isEmpty();
+
+	var errors = req.validationErrors();
+	if (errors)
+		return res.status(400).json({
+			errors: errors
+		});
+
+	var query = {
+		_id: new ObjectId(req.body.bikeId)
+	};
+
+
+	Bike.find(query).lean().exec(function getAllBikes(err, bikes) {
+		if (err)
+			return next(err);
+
+		bike.status = 'moving'; // Aqui seria bueno colocar el destino al q c mueve, no estoy claro d como/donde hacerlo
+		//**************************************************************************************************************
+		//**************************************************************************************************************
+		//**************************************************************************************************************
+		//**************************************************************************************************************
+
+		bike.save(function saveBike(err) {
+			if (err)
+				return next(err);
+
+			return res.status(200).send();
+		});
+	});
+};
+
+exports.breakBike = function(req, res, next) {
+
+	req.checkBody('bikeId', 'Bike id is required').isEmpty();
+
+	var errors = req.validationErrors();
+	if (errors)
+		return res.status(400).json({
+			errors: errors
+		});
+
+	var query = {
+		_id: new ObjectId(req.body.bikeId)
+	};
+
+
+	Bike.find(query).lean().exec(function getAllBikes(err, bikes) {
+		if (err)
+			return next(err);
+
+		bike.status = 'broken';
+
+		bike.save(function saveBike(err) {
+			if (err)
+				return next(err);
+
+			return res.status(200).send();
+		});
+	});
+};
+
+exports.stealBike = function(req, res, next) {
+
+	req.checkBody('bikeId', 'Bike id is required').isEmpty();
+
+	var errors = req.validationErrors();
+	if (errors)
+		return res.status(400).json({
+			errors: errors
+		});
+
+	var query = {
+		_id: new ObjectId(req.body.bikeId)
+	};
+
+
+	Bike.find(query).lean().exec(function getAllBikes(err, bikes) {
+		if (err)
+			return next(err);
+
+		bike.status = 'stolen';
+
+		bike.save(function saveBike(err) {
+			if (err)
+				return next(err);
+
+			return res.status(200).send();
+		});
+	});
+};
+
+exports.avaliableBike = function(req, res, next) {
+
+	req.checkBody('bikeId', 'Bike id is required').isEmpty();
+
+	var errors = req.validationErrors();
+	if (errors)
+		return res.status(400).json({
+			errors: errors
+		});
+
+	var query = {
+		_id: new ObjectId(req.body.bikeId)
+	};
+
+
+	Bike.find(query).lean().exec(function getAllBikes(err, bikes) {
+		if (err)
+			return next(err);
+
+		bike.status = 'avaliable';
+
+		bike.save(function saveBike(err) {
+			if (err)
+				return next(err);
+
+			return res.status(200).send();
+		});
+	});
+};
