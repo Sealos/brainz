@@ -19,6 +19,17 @@ exports.getBikes = function(req, res, next) {
 	});
 };
 
+exports.getBike = function(req, res, next) {
+	var query = {};
+
+	if (req.params.status)
+		query.status = req.params.status;
+
+	Bike.findOne({licensePlate: req.params.licensePlate}).lean().exec(function getBike(err, bike) {
+		return res.status(200).json(bike);
+	});
+};
+
 exports.createBike = function(req, res, next) {
 	req.checkBody('licensePlate', 'licensePlate is required').notEmpty();
 	req.checkBody('color', 'color is required').notEmpty();
