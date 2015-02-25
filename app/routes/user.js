@@ -8,7 +8,6 @@ var userAuth = require('../middlewares/user_auth')({
 	secret: config.jwt
 });
 
-
 function checkPermission(permission) {
 	return function checkPermission(req, res, next) {
 		var hasPermission = (req.user.permission & permission) > 0;

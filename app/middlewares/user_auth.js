@@ -3,7 +3,6 @@
 var jwt = require('jsonwebtoken');
 var unless = require('express-unless');
 var User = require('../models/user');
-var Event = require('./analytic');
 var config = require('../config/config');
 
 /**
