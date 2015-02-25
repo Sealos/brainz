@@ -13,4 +13,10 @@ module.exports = {
 	hostname: process.env.HOST || process.env.HOSTNAME,
 	jwt: 'y4A8svIZ9oVwHGaoYXOA',
 	apiVersion: 0.1,
+	permission: {
+		greasemonkey: 2,
+		technician: 4,
+		operator: 8,
+		admin: 16,
+	}
 };

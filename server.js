@@ -62,9 +62,20 @@ app.use(validator([]));
 app.use(methodOverride());
 
 var bikeRouter = require('./app/routes/bike');
+var userRouter = require('./app/routes/user');
+
+var userAuth = require('./app/middlewares/user_auth')({
+	secret: config.jwt
+});
 
 // Routes are defined
-app.use('/api/bike', bikeRouter);
+app.use('/api/user', userRouter);
+app.use('/api/bike', userAuth, bikeRouter);
+
+app.use(function onError(err, req, res, next) {
+	res.status(503).send();
+});
+
 
 /**
  * Called on ^C keyboard interruption
