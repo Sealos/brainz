@@ -32,58 +32,44 @@ module.exports = function(options) {
 				}
 			} else
 				return res.status(400).json({
-					errors: 'Authorization header required'
+					errors: ['Invalid Authorization header']
 				});
 		} else
 			return res.status(400).json({
-				errors: 'Authorization header required'
+				errors: ['Authorization header required']
 			});
 
 		// Decode the token
 		jwt.verify(token, options.secret, options, function decodeJWT(err, decoded) {
 
 			if (err)
-				return res.status(409).send();
+				return res.status(401).json({
+					errors: ['Error decoding token']
+				});
 
 			// Get the current user data
-			User.findById(decoded._id, function getUser(err, usr) {
+			var query = {
+				email: decoded._id
+			};
+
+			User.findOne(query, function getUser(err, usr) {
 
 				if (err)
 					return res.status(503).send();
 
-				if (!usr || usr.password !== decoded.password)
-					return res.status(401).send();
-
-				req.user = usr;
-
-				var geoloc = req.headers['x-geolocation'];
-
-				if (geoloc) {
-					geoloc = geoloc.split(',');
-
-					if (geoloc.length === 2) {
-						usr.lastKnownLoc = geoloc;
-						usr.hasGps = true;
-					} else {
-						return res.status(400).json({
-							errors: 'Invalid x-geolocation header'
-						});
-					}
-
-					req.user.location = geoloc;
+				if (usr === null) {
+					return res.status(400).json({
+						errors: ['Error decoding token']
+					});
 				}
 
-				/*var agent = req.headers['x-user-agent'];
+				if (usr.password !== decoded.password) {
+					return res.status(401).send({
+						errors: ['Passwords do not match']
+					});
+				}
 
-				if (!agent)
-					agent = req.headers['user-agent'];
-
-				if (agent)
-					Event.registerUserAgent(agent);
-				else
-					return res.status(400).json({
-						errors: 'User-Agent header required'
-					});*/
+				req.user = usr;
 
 				// Update the user
 				usr.lastAccess = Date.now();

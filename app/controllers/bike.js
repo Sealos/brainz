@@ -3,6 +3,8 @@
 // Module dependencies.
 var _ = require('lodash');
 var Bike = require('../models/bike');
+var BikeLog = require('../models/bike_log');
+var UserLog = require('../models/user_log');
 var ObjectId = require('mongodb').ObjectID;
 
 /**
@@ -25,7 +27,9 @@ exports.getBike = function(req, res, next) {
 	if (req.params.status)
 		query.status = req.params.status;
 
-	Bike.findOne({licensePlate: req.params.licensePlate}).lean().exec(function getBike(err, bike) {
+	Bike.findOne({
+		licensePlate: req.params.licensePlate
+	}).lean().exec(function getBike(err, bike) {
 		return res.status(200).json(bike);
 	});
 };
@@ -52,16 +56,15 @@ exports.createBike = function(req, res, next) {
 			return res.status(409).json({
 				err: 'Duplicated licensePlate'
 			});
-
 		return res.status(200).send();
 	});
 };
 
-exports.changeStatus = function(req, res, next) {
+var bikeStates = ['lended','broken', 'stolen', 'repairing', 'moving', 'storage', 'available'];
 
-	req.checkBody('bikeId', 'bikeId is required').notEmpty();
+exports.changeStatus = function(req, res, next) {
 	req.checkBody('status', 'status is required').notEmpty();
-	req.checkBody('comment', 'commnet is required').notEmpty();
+	req.checkBody('comment', 'comment is required').notEmpty();
 
 	var errors = req.validationErrors();
 	if (errors)
@@ -69,28 +72,86 @@ exports.changeStatus = function(req, res, next) {
 			errors: errors
 		});
 
-	Bike.findOne(new ObjectId(req.body.bikeId), function getBikeToLend(err, bike) {
+	var newStatus = req.body.status;
+
+	var statusIndex = _.indexOf(bikeStates, newStatus);
+
+	if (statusIndex < 0)
+		return res.status(400).json({
+			errors: ['Invalid status']
+		});
+
+	var query = {
+		licensePlate: req.params.licensePlate
+	};
+
+	Bike.findOne(query, function getBikeToLend(err, bike) {
 		if (err)
 			return next(err);
 
 		if (bike === null)
 			return res.status(404).send();
 
+		if (bike.status === req.body.status) {
+			return res.status(409).json({
+				errors: ['No change in status']
+			});
+		}
+
 		var log = {
 			oldState: bike.status,
-			newState: req.body.status,
+			newState: newStatus,
 			date: Date.now(),
-			comment: req.body.comment
+			comment: req.body.comment,
+			submittedBy: req.user._id
 		};
 
+		var lendedTo = req.body.lendedTo;
+
+		if (lendedTo !== undefined)
+			log.lendedTo = lendedTo;
+
 		bike.status = req.body.status;
-		bike.log.push(log);
-		// NOTE(sdecolli): Finish this when we have user data
 		bike.save(function saveBike(err) {
 			if (err)
 				return next(err);
 
+			var query = {
+				licensePlate: req.body.licensePlate
+			};
+
+			var update = {
+				$push: {
+					log: log
+				}
+			};
+
+			BikeLog.update(query, update, {
+				upsert: true
+			}, function upsertLog(err, num) {});
+
 			return res.status(200).send();
+		});
+	});
+};
+
+exports.getBikeLog = function(req, res, next) {
+
+	var query = {
+		licensePlate: req.params.licensePlate
+	};
+
+	BikeLog.findOne(query).lean().exec(function getBike(err, log) {
+		if (err)
+			return next(err);
+
+		if (!log)
+			return res.status(200).json({
+				log: []
+			});
+
+		return res.status(200).json({
+			log: log.log
 		});
 	});
 };

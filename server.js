@@ -58,11 +58,23 @@ app.use(bodyParser.urlencoded({
 	extended: true
 }));
 app.use(bodyParser.json());
-app.use(validator([]));
+app.use(validator({
+	customValidators: {
+		isValidLocation: function(value) {
+			var arr = value.split(',');
+			if (arr.length !== 2)
+				return false;
+			if (isNaN(parseFloat(arr[0])) || isNaN(parseFloat(arr[1])))
+				return false;
+			return true;
+		}
+	}
+}));
 app.use(methodOverride());
 
 var bikeRouter = require('./app/routes/bike');
 var userRouter = require('./app/routes/user');
+var bikeStationRouter = require('./app/routes/bike_station');
 
 var userAuth = require('./app/middlewares/user_auth')({
 	secret: config.jwt
@@ -71,16 +83,11 @@ var userAuth = require('./app/middlewares/user_auth')({
 // Routes are defined
 app.use('/api/user', userRouter);
 app.use('/api/bike', userAuth, bikeRouter);
+app.use('/api/station', userAuth, bikeStationRouter);
 
 app.use(function onError(err, req, res, next) {
-	res.status(503).send();
-});
-
-
-/**
- * Called on ^C keyboard interruption
- */
-process.on('SIGINT', function onInterruption() {
-	app.close();
-	process.exit();
+	console.error(err);
+	res.status(503).send({
+		errors: err
+	});
 });

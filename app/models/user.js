@@ -1,31 +1,49 @@
 'use strict';
 
 var mongoose = require('mongoose');
-var schema = mongoose.Schema;
+var Schema = mongoose.Schema;
 var crypto = require('crypto');
 var config = require('../config/config');
 
 var Address = {
-	line: { type: String },
-	city: { type: String },
-	state: { type: String },
+	line: {
+		type: String
+	},
+	city: {
+		type: String
+	},
+	state: {
+		type: String
+	},
 };
 
 var Devices = {
-	agent: { type: String },
-	token: { type: String },
+	agent: {
+		type: String
+	},
+	token: {
+		type: String
+	},
 	_id: false
 };
 
 var Name = {
-	first: { type: String },
-	last: { type: String },
+	first: {
+		type: String
+	},
+	last: {
+		type: String
+	},
 };
 
-var userSchema = new schema({
+var userSchema = new Schema({
 	_id: {
 		type: String,
 		required: true,
+		unique: true
+	},
+	usbId: {
+		type: String,
 		unique: true
 	},
 	email: {
@@ -41,10 +59,19 @@ var userSchema = new schema({
 			state: '',
 		}
 	},
-	appVersion: { type: String },
-	apiVersion: { type: Number, default: config.apiVersion },
-	dateOfBirth: { type: Date },
-	gender: { type: String },
+	appVersion: {
+		type: String
+	},
+	apiVersion: {
+		type: Number,
+		default: config.apiVersion
+	},
+	dateOfBirth: {
+		type: Date
+	},
+	gender: {
+		type: String
+	},
 	lastAccess: {
 		type: Date,
 		default: Date.now()
@@ -68,13 +95,7 @@ var userSchema = new schema({
 		required: true
 	},
 	salt: {
-		type: String,
-		required: true
-	},
-	lastUserAgent: {
-		type: String,
-		default: '',
-		required: true
+		type: String
 	},
 	permission: {
 		type: Number,
@@ -83,7 +104,7 @@ var userSchema = new schema({
 	},
 	lastKnownLoc: [Number],
 	devices: [Devices],
-},{
+}, {
 	versionKey: false
 });
 
@@ -106,7 +127,7 @@ userSchema.methods = {
 	},
 
 	hashPassword: function(password) {
-		var hash = crypto.createHash('SHA512').update(password + this.salt).digest('hex');
+		var hash = crypto.createHash('SHA256').update(password + this.salt).digest('hex');
 		return hash;
 	},
 

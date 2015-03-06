@@ -7,19 +7,9 @@ var config = require('../config/config');
 var userAuth = require('../middlewares/user_auth')({
 	secret: config.jwt
 });
+var userPermission = require('../middlewares/user_permission');
 
-function checkPermission(permission) {
-	return function checkPermission(req, res, next) {
-		var hasPermission = (req.user.permission & permission) > 0;
-
-		if (hasPermission)
-			next();
-		else
-			res.status(401).send();
-	};
-}
-
-var isAdmin = checkPermission(config.permission.admin);
+var isAdmin = userPermission(config.permission.admin);
 
 var router = express.Router();
 
@@ -27,6 +17,7 @@ router.post('/register', user.createUser);
 router.post('/login', user.login);
 
 router.use(userAuth, isAdmin);
-router.put('/admin/permission', user.changeUserPermission);
+router.put('/admin/user/:userId/permission', user.changeUserPermission);
+router.get('/admin/user/:userId/logs', user.getUserLog);
 
 module.exports = router;

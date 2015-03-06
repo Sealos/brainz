@@ -14,6 +14,7 @@ module.exports = {
 	jwt: 'y4A8svIZ9oVwHGaoYXOA',
 	apiVersion: 0.1,
 	permission: {
+		inventoryManager: 1,
 		greasemonkey: 2,
 		technician: 4,
 		operator: 8,

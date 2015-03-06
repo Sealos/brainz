@@ -4,6 +4,7 @@
 var jwt = require('jsonwebtoken');
 var config = require('../config/config');
 var User = require('../models/user');
+var UserLog = require('../models/user_log');
 var _ = require('lodash');
 var crypto = require('crypto');
 
@@ -17,11 +18,9 @@ function createToken(_id, password) {
 
 exports.createUser = function(req, res, next) {
 	req.checkBody('idDocument', 'idDocument is required').notEmpty();
-	req.checkBody('email', 'email is required').notEmpty().isEmail();
-	req.checkBody('dayOfBirth', 'dayOfBirth is required').notEmpty();
-	req.checkBody('monthOfBirth', 'monthOfBirth is required').notEmpty();
-	req.checkBody('yearOfBirth', 'yearOfBirth is required').notEmpty();
-	req.checkBody('password', 'password is required').notEmpty();
+	req.checkBody('email', 'email is required').notEmpty();
+	req.checkBody('email', 'email must have a valid format').optional().isEmail();
+	req.checkBody('dateOfBirth', 'dateOfBirth is required, YYYY/MM/DD').notEmpty();
 
 	var errors = req.validationErrors();
 	if (errors)
@@ -31,10 +30,10 @@ exports.createUser = function(req, res, next) {
 
 	var email = req.body.email.toLowerCase();
 	// TODO(sdecolli): verify idDocument format.
-	var dob = new Date(req.body.monthOfBirth + '-' + req.body.dayOfBirth + '-' + req.body.yearOfBirth);
+	var dob = new Date(req.body.dateOfBirth);
 	if (dob === false)
 		return res.status(400).json({
-			errors: 'Invalid date'
+			errors: ['Invalid date']
 		});
 
 	var user = new User({
@@ -44,22 +43,27 @@ exports.createUser = function(req, res, next) {
 		password: req.body.password
 	});
 
+	var usbId = req.body.usbId;
+
+	if (usbId !== undefined)
+		user.usbId = usbId;
+
 	user.save(function saveUser(err) {
 		if (err)
-			return next(err);
+			return res.status(409).send();
 
-		var token = createToken(email, req.body.password);
+		var token = createToken(email, user.password);
 
 		return res.status(200).json({
 			token: token
 		});
 	});
-
 };
 
 exports.login = function(req, res, next) {
 	req.checkBody('password', 'password is required').notEmpty();
 	req.checkBody('email', 'email is required').notEmpty();
+	req.checkBody('email', 'email must have a valid format').optional().isEmail();
 
 	var errors = req.validationErrors();
 	if (errors)
@@ -77,17 +81,17 @@ exports.login = function(req, res, next) {
 
 		if (!user)
 			return res.status(404).json({
-				errors: 'Invalid username or password'
+				errors: ['Invalid username or password']
 			});
 		if (user.auth(req.body.password)) {
-			var token = createToken(req.body.email, req.body.password);
+			var token = createToken(req.body.email, user.password);
 
 			return res.status(200).json({
 				token: token
 			});
 		} else {
 			return res.status(400).json({
-				errors: 'Invalid username or password'
+				errors: ['Invalid username or password']
 			});
 		}
 	});
@@ -103,9 +107,9 @@ exports.changeUserPermission = function(req, res, next) {
 			errors: errors
 		});
 
-	if (req.body.permission < 0) 
+	if (req.body.permission < 0)
 		return res.status(400).json({
-			errors: 'Permission must be greater than 0'
+			errors: ['Permission must be greater than 0']
 		});
 
 	var query = {
@@ -122,7 +126,7 @@ exports.changeUserPermission = function(req, res, next) {
 
 		if (!user)
 			return res.status(404).json({
-				errors: 'Invalid username or password'
+				errors: ['Invalid username or password']
 			});
 		if (user.auth(req.body.password)) {
 			var token = createToken(req.body.email, req.body.password);
@@ -132,8 +136,28 @@ exports.changeUserPermission = function(req, res, next) {
 			});
 		} else {
 			return res.status(400).json({
-				errors: 'Invalid username or password'
+				errors: ['Invalid username or password']
 			});
 		}
+	});
+};
+
+exports.getUserLog = function(req, res, next) {
+	var query = {
+		_id: req.params.userId
+	};
+
+	UserLog.findOne(query).lean().exec(function getLog(err, log) {
+		if (err)
+			return next(err);
+
+		if (!log)
+			return res.status(200).json({
+				log: []
+			});
+
+		return res.status(200).json({
+			log: log.log
+		});
 	});
 };

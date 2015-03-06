@@ -1,36 +1,15 @@
 'use strict';
 
 var mongoose = require('mongoose');
-var schema = mongoose.Schema;
-var ObjectId = schema.Types.ObjectId;
+var Schema = mongoose.Schema;
+var ObjectId = Schema.Types.ObjectId;
 
-var Log = {
-	oldState: {
-		type: String,
-		required: true
-	},
-	newState: {
-		type: String,
-		required: true
-	},
-	date: {
-		type: Date,
-		required: true,
-		default: Date.now()
-	},
-	comment: {
-		type: String,
-		required: true,
-		default: ''
-	},
-	_id: false
-};
-
-var Schema = new schema({
+var schema = new Schema({
 	_id: {
 		type: ObjectId,
 		required: true,
 		unique: true,
+		index: true,
 		default: mongoose.Types.ObjectId()
 	},
 	licensePlate: {
@@ -47,8 +26,13 @@ var Schema = new schema({
 		type: String,
 		required: true
 	},
+	private: {
+		type: Boolean,
+		default: false,
+		required: true
+	},
 
-	// En uso - Lended
+	// En uso - lended
 	// Danada - broken
 	// Robada - stolen
 	// Reparacion - repairing
@@ -61,7 +45,6 @@ var Schema = new schema({
 		default: 'available',
 		index: true
 	},
-	log: [Log]
 });
 
-module.exports = mongoose.model('bike', Schema);
+module.exports = mongoose.model('bike', schema);
