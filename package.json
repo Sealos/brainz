@@ -30,7 +30,7 @@
     "grunt-env": "^0.4.4",
     "grunt-nodemon": "^0.4.0",
     "jsonwebtoken": "^4.0.0",
-    "load-grunt-tasks": "*",
+    "load-grunt-tasks": "^3.1.0",
     "lodash": "^3.4.0",
     "mandrill-api": "^1.0.41",
     "memory-cache": "^0.1.1",
