@@ -17,6 +17,10 @@ var Log = {
 		required: true,
 		default: Date.now()
 	},
+	estimatedReturn: {
+		type: Date,
+		required: false
+	},
 	comment: {
 		type: String,
 		required: true,
@@ -24,14 +28,14 @@ var Log = {
 	},
 	lendedTo: {
 		type: String,
-		required: true,
-		ref: 'users'
+		required: false,
+		ref: 'user'
 	},
 	_id: false,
 	submittedBy: {
 		type: String,
 		required: true,
-		ref: 'users'
+		ref: 'user'
 	}
 };
 

@@ -13,8 +13,9 @@ var Log = {
 		required: true,
 		default: Date.now()
 	},
-	estimatedArrival: {
-		type: Date
+	estimatedReturn: {
+		type: Date,
+		required: false
 	},
 	comment: {
 		type: String,
@@ -32,7 +33,7 @@ var schema = new Schema({
 		type: String,
 		required: true,
 		index: true,
-		ref: 'users'
+		ref: 'user'
 	},
 	log: [Log]
 });

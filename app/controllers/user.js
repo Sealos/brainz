@@ -161,3 +161,28 @@ exports.getUserLog = function(req, res, next) {
 		});
 	});
 };
+
+/**
+ * This functions verifies the existence of the user at the body.user
+ */
+exports.verifyUser = function(req, res, next) {
+	req.checkBody('user', 'user is required').notEmpty();
+
+	var errors = req.validationErrors();
+	if (errors)
+		return res.status(400).json({
+			errors: errors
+		});
+
+	User.findById(req.body.user).lean()
+		.exec(function getUserById(err, usr) {
+			if (err)
+				return next(err);
+			if (!usr)
+				res.status(404).json({
+					errors: ['User not found']
+				});
+			else
+				next();
+		});
+};

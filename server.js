@@ -57,7 +57,6 @@ app.use(function allowCrossDomain(req, res, next) {
 app.use(bodyParser.urlencoded({
 	extended: true
 }));
-app.use(bodyParser.json());
 app.use(validator({
 	customValidators: {
 		isValidLocation: function(value) {
@@ -67,7 +66,24 @@ app.use(validator({
 			if (isNaN(parseFloat(arr[0])) || isNaN(parseFloat(arr[1])))
 				return false;
 			return true;
-		}
+		},
+		isDate: function(input) {
+			try {
+				var isoStr = ('' + input).replace(/ /, 'T') + 'Z';
+				var newStr = new Date(isoStr).toISOString();
+				return isoStr.slice(0, 19) === newStr.slice(0, 19);
+			} catch (e) {
+				return false;
+			}
+		},
+		isPositiveInt: function(value) {
+			return value >>> 0 === parseFloat(value);
+		},
+
+		isPositiveFloat: function(value) {
+			value = parseFloat(value);
+			return !isNaN(value) && value > 0;
+		},
 	}
 }));
 app.use(methodOverride());

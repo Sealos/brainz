@@ -60,11 +60,25 @@ exports.createBike = function(req, res, next) {
 	});
 };
 
-var bikeStates = ['lended','broken', 'stolen', 'repairing', 'moving', 'storage', 'available'];
+var bikeStates = [
+	'lended', 'broken', 'stolen', 'repairing',
+	'moving', 'storage', 'available'
+];
 
 exports.changeStatus = function(req, res, next) {
-	req.checkBody('status', 'status is required').notEmpty();
+	return res.status(300).send();
+};
+
+/**
+ * Function that manages when a bike is lended to an user
+ * This methods follows verifyUser, so the req.body.user is already verified
+ */
+exports.lendBike = function(req, res, next) {
 	req.checkBody('comment', 'comment is required').notEmpty();
+	req.checkBody('hours', 'hours is required').notEmpty();
+	req.checkBody('minutes', 'minutes is required').notEmpty();
+	req.checkBody('hours', 'minutes is not a valid number').optional().isPositiveInt();
+	req.checkBody('minutes', 'minutes is not a valid number').optional().isPositiveInt();
 
 	var errors = req.validationErrors();
 	if (errors)
@@ -72,63 +86,93 @@ exports.changeStatus = function(req, res, next) {
 			errors: errors
 		});
 
-	var newStatus = req.body.status;
-
-	var statusIndex = _.indexOf(bikeStates, newStatus);
-
-	if (statusIndex < 0)
-		return res.status(400).json({
-			errors: ['Invalid status']
-		});
+	var licensePlate = req.params.licensePlate;
 
 	var query = {
-		licensePlate: req.params.licensePlate
+		licensePlate: licensePlate
 	};
 
 	Bike.findOne(query, function getBikeToLend(err, bike) {
+
 		if (err)
 			return next(err);
 
 		if (bike === null)
 			return res.status(404).send();
 
-		if (bike.status === req.body.status) {
+		if (bike.status !== 'available') {
 			return res.status(409).json({
-				errors: ['No change in status']
+				errors: ['This bike is not available']
 			});
 		}
+		var minutes = req.body.minutes;
+		var hours = req.body.hours;
+		var now = Date.now();
+		var estimatedReturn = now
+			.setMinutes(now.getMinutes() + minutes)
+			.setHours(now.getHours() + hours);
+		var comment = req.body.comment;
 
-		var log = {
+		var bikeLog = {
 			oldState: bike.status,
-			newState: newStatus,
-			date: Date.now(),
-			comment: req.body.comment,
-			submittedBy: req.user._id
+			newState: 'lended',
+			date: now,
+			estimatedReturn: estimatedReturn,
+			comment: comment,
+			submittedBy: req.user._id,
+			lendedTo: req.body.lendedTo
 		};
 
-		var lendedTo = req.body.lendedTo;
-
-		if (lendedTo !== undefined)
-			log.lendedTo = lendedTo;
+		var userLog = {
+			action: 'lendBike',
+			date: now,
+			estimatedReturn: estimatedReturn,
+			comment: comment,
+			licensePlate: licensePlate
+		};
 
 		bike.status = req.body.status;
 		bike.save(function saveBike(err) {
 			if (err)
 				return next(err);
 
-			var query = {
-				licensePlate: req.body.licensePlate
+			var bikeQuery = {
+				licensePlate: licensePlate
+			};
+			var userQuery = {
+				_id: req.body.user
 			};
 
-			var update = {
+			var bikeUpdate = {
 				$push: {
-					log: log
+					log: bikeLog
 				}
 			};
 
-			BikeLog.update(query, update, {
+			var userUpdate = {
+				$push: {
+					log: userLog
+				}
+			};
+
+			var options = {
 				upsert: true
-			}, function upsertLog(err, num) {});
+			};
+
+			BikeLog.update(bikeQuery, bikeUpdate, options)
+				.exec(function upsertBikeLog(err, num) {
+					if (err) {
+						console.err(err);
+						throw new Error('There was an error saving the bike log: \n' + err);
+					}
+				});
+			UserLog.update(userQuery, userUpdate, options)
+				.exec(function upsertUserLog(err, num) {
+					if (err) {
+						console.err(err);
+						throw new Error('There was an error saving the user log: \n' + err);
+					}
+				});
 
 			return res.status(200).send();
 		});

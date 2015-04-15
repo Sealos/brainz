@@ -32,17 +32,14 @@ var schema = new Schema({
 		required: true
 	},
 
-	// En uso - lended
-	// Danada - broken
-	// Robada - stolen
-	// Reparacion - repairing
-	// En movilizacion - moving
-	// En almacen - storage
-	// Disponible - available
 	status: {
 		type: String,
 		required: true,
 		default: 'available',
+		enum: [
+			'lended', 'broken', 'stolen', 'repairing',
+			'moving', 'storage', 'available'
+		],
 		index: true
 	},
 });

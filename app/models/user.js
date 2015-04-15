@@ -5,54 +5,37 @@ var Schema = mongoose.Schema;
 var crypto = require('crypto');
 var config = require('../config/config');
 
-var Address = {
-	line: {
-		type: String
-	},
-	city: {
-		type: String
-	},
-	state: {
-		type: String
-	},
-};
-
-var Devices = {
-	agent: {
-		type: String
-	},
-	token: {
-		type: String
-	},
-	_id: false
-};
-
-var Name = {
-	first: {
-		type: String
-	},
-	last: {
-		type: String
-	},
-};
-
 var userSchema = new Schema({
 	_id: {
 		type: String,
 		required: true,
-		unique: true
+		unique: true,
+		trim: true
 	},
 	usbId: {
 		type: String,
-		unique: true
+		unique: true,
+		trim: true
 	},
 	email: {
 		type: String,
 		required: true,
-		unique: true
+		unique: true,
+		lowercase: true,
+		trim: true
 	},
 	address: {
-		type: Address,
+
+		line: {
+			type: String
+		},
+		city: {
+			type: String
+		},
+		state: {
+			type: String
+		},
+
 		default: {
 			line: '',
 			city: '',
@@ -78,7 +61,12 @@ var userSchema = new Schema({
 	},
 	mobilePhone: [String],
 	name: {
-		type: Name,
+		first: {
+			type: String
+		},
+		last: {
+			type: String
+		},
 		default: {
 			first: '',
 			last: ''
@@ -103,7 +91,15 @@ var userSchema = new Schema({
 		required: true
 	},
 	lastKnownLoc: [Number],
-	devices: [Devices],
+	devices: [{
+		agent: {
+			type: String
+		},
+		token: {
+			type: String
+		},
+		_id: false
+	}],
 }, {
 	versionKey: false
 });
