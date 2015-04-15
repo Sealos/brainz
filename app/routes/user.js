@@ -16,7 +16,10 @@ var router = express.Router();
 router.post('/register', user.createUser);
 router.post('/login', user.login);
 
-router.use(userAuth, isAdmin);
+router.use(userAuth);
+router.get('/', user.getUser);
+
+router.use(isAdmin);
 router.put('/admin/user/:userId/permission', user.changeUserPermission);
 router.get('/admin/user/:userId/logs', user.getUserLog);
 

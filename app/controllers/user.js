@@ -21,6 +21,7 @@ exports.createUser = function(req, res, next) {
 	req.checkBody('email', 'email is required').notEmpty();
 	req.checkBody('email', 'email must have a valid format').optional().isEmail();
 	req.checkBody('dateOfBirth', 'dateOfBirth is required, YYYY/MM/DD').notEmpty();
+	req.checkBody('password', 'password is required').notEmpty();	
 
 	var errors = req.validationErrors();
 	if (errors)
@@ -185,4 +186,15 @@ exports.verifyUser = function(req, res, next) {
 			else
 				next();
 		});
+};
+
+exports.getUser = function(req, res, next) {
+	req.user.apiVersion = undefined;
+	req.user.lastKnownLoc = undefined;
+	req.user.permission = undefined;
+	req.user.lastAccess = undefined;
+
+	return res.status(200).json({
+		user: req.user
+	});
 };
